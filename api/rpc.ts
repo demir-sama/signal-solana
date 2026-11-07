@@ -1,10 +1,16 @@
 // Fixed-destination, devnet-only JSON-RPC relay. No secrets or arbitrary upstream URLs.
-const allowed=new Set(['getGenesisHash','getLatestBlockhash','getMultipleAccounts','getBalance','getFeeForMessage','simulateTransaction','isBlockhashValid','sendTransaction','getSignatureStatuses','getTransaction','getBlockHeight']);
+const allowed=new Set(['getGenesisHash','getSlot','getBlock','getLatestBlockhash','getMultipleAccounts','getBalance','getFeeForMessage','simulateTransaction','isBlockhashValid','sendTransaction','getSignatureStatuses','getTransaction','getBlockHeight']);
 export default async function handler(req:any,res:any){
  res.setHeader('Cache-Control','no-store');
  if(req.method!=='POST')return res.status(405).json({error:'POST required'});
  const b=req.body;
  if(!b||Array.isArray(b)||b.jsonrpc!=='2.0'||!allowed.has(b.method)||JSON.stringify(b).length>24000)return res.status(400).json({error:'Unsupported devnet RPC request'});
+ // Discovery is restricted to account metadata, not full block bodies or arbitrary heavy configurations.
+ if(b.method==='getBlock'){
+  if(!Array.isArray(b.params)||b.params.length!==2)return res.status(400).json({error:'Two block parameters required'});
+  const [slot,c]=b.params;
+  if(!Number.isSafeInteger(slot)||slot<0||!c||c.commitment!=='confirmed'||c.encoding!=='json'||c.transactionDetails!=='accounts'||c.rewards!==false||c.maxSupportedTransactionVersion!==1||Object.keys(c).some(k=>!['commitment','encoding','transactionDetails','rewards','maxSupportedTransactionVersion'].includes(k)))return res.status(400).json({error:'Only bounded-format devnet account discovery is supported'});
+ }
  try{
   const upstream=await fetch('https://api.devnet.solana.com',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b),signal:AbortSignal.timeout(18000)});
   if(!upstream.ok)return res.status(503).json({error:'Public devnet RPC temporarily unavailable'});

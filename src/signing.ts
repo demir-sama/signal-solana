@@ -11,6 +11,11 @@ export async function authorizeAndBroadcast({analysis:a,simulation:sim,wallet,fi
  await assertDevnet();
  const valid=await rpc('isBlockhashValid',[a.blockhash,{commitment:'confirmed'}]);
  if(!valid.value)throw new Error('The preview blockhash expired. Rebuild and review again. Signal will not silently change your transaction.');
+ // Re-check the exact original message immediately before the wallet request. No replacement blockhash.
+ const exact=await rpc('simulateTransaction',[a.base64,{encoding:'base64',commitment:'confirmed',sigVerify:false,replaceRecentBlockhash:false}]);
+ if(exact.value?.err)throw new Error(`Exact-message pre-approval simulation failed: ${JSON.stringify(exact.value.err)}. No signature requested.`);
+ if(!exact.value||exact.value.err!==null)throw new Error('Exact-message pre-approval simulation was unavailable. No signature requested.');
+ if(!fresh()||!isCurrent()||wallet.publicKey?.toBase58()!==a.payer)throw new Error('The review expired or changed during pre-approval checks. No signature requested.');
  const original=Buffer.from(a.tx.message.serialize()).toString('base64');
  const signed=await wallet.signTransaction(VersionedTransaction.deserialize(Buffer.from(a.base64,'base64')));
  if(!isCurrent())throw new Error('The request changed while the wallet was open. Broadcasting blocked.');

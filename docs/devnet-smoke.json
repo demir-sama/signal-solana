@@ -1,16 +1,28 @@
 {
-  "verifiedAt": "2026-11-07T15:26:15.498Z",
+  "verifiedAt": "2026-11-07T16:08:31.692Z",
   "network": "devnet",
-  "method": "read-only unsigned simulation; no broadcast",
-  "fixtureFailure": "AccountNotFound",
+  "method": "Actual prepareLiveExample feature through production API handler; read-only unsigned simulation, no wallet or broadcast",
+  "fixtureOutcome": "AccountNotFound",
   "successfulSimulation": {
-    "slot": 519704539,
+    "slot": 519715143,
     "units": 150,
+    "fee": 5000,
     "err": null,
     "logs": [
       "Program 11111111111111111111111111111111 invoke [1]",
       "Program 11111111111111111111111111111111 success"
     ]
   },
-  "limitations": "Not a wallet/signature/confirmed-receipt test. A public funded account was used for unsigned simulation only."
+  "discoveredSlot": 519715137,
+  "rpcMethods": [
+    "getGenesisHash",
+    "getSlot",
+    "getBlock",
+    "getMultipleAccounts",
+    "getLatestBlockhash",
+    "getGenesisHash",
+    "getMultipleAccounts",
+    "simulateTransaction"
+  ],
+  "limitations": "Not browser, wallet, signature, broadcast, confirmed receipt or Phantom clearance verification. Public funded fee-payer address used for unsigned simulation only."
 }

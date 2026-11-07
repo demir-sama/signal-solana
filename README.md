@@ -6,6 +6,12 @@ Signal is a working, devnet-only Solana transaction inspection workspace: import
 
 Built during the MLH Solana hackathon coding window in November 2026. Intended AI-track entry; eligibility and submission are **not** claimed verified. No paid inference APIs, custodial keys, database or mainnet endpoint.
 
+## Wallet security warning — review pending
+
+A user reported Phantom’s “This dApp could be malicious” / blocked-request warning on the production domain. **Do not override it.** The exact cause is unconfirmed. This patch pauses wallet connection/signing in the UI while review is pending; no wallet/domain switching or security bypass is offered. Successful unsigned RPC simulation is not Phantom clearance or proof of safety. The implemented signing/receipt code remains tested with in-memory mocks, not a verified real-wallet flow. See [audit findings and official review route](docs/PHANTOM-REVIEW.md).
+
+No-wallet decoding, real unsigned devnet simulation and optional local AI remain available.
+
 ## Run locally
 
 Requires Node 22.12+ (tested with Node 24), npm, and a modern browser.
@@ -26,10 +32,11 @@ npm run build
 - **Instruction evidence:** System Program direct SOL transfers; classic SPL Token Transfer, TransferChecked, Approve, ApproveChecked, Revoke, SetAuthority and CloseAccount; compute budget price/limit; Memo v2. Unsupported operations fail closed as unknown effects.
 - **Animated storyboard:** selectable instruction frames, directional flow, exact integer amounts, account references, risk and uncertainty panels. Permissions are explicitly not transfers. The UI respects reduced-motion preferences.
 - **Honest walkthroughs:** four actual SDK-serialized unsigned fixtures: payment, two-recipient split payment, maximum-u64 delegate approval and unknown program. They are labeled illustrative, cannot be signed, and are usually unfunded. Their simulation may correctly fail with `AccountNotFound`.
+- **Live no-wallet sample:** explicit action discovers a public funded system-owned devnet fee-payer from recent public block metadata, builds fresh genuine SDK transaction bytes, and shows only an actually successful unsigned simulation. It claims no authority over that account, never signs/broadcasts, replaces the displayed bytes visibly, and stays marked inspection-only. Bounded attempts and RPC errors fail honestly.
 - **Devnet simulation:** verified cluster genesis, unsigned simulation with `sigVerify: false`, `replaceRecentBlockhash: true`, logs, compute usage, fee estimate and account snapshots. No broadcast during simulation.
 - **Real local AI:** optional SmolLM2-360M-Instruct ONNX q4 inference using Transformers.js, inside a dedicated WASM Web Worker. Download consent is explicit; about **390 MB** model files plus about 27 MB runtime, with substantial RAM requirements. No generated text is shown before the model actually runs.
-- **Actual wallet path:** injected Phantom or Solflare; build a fresh 0.001 devnet SOL transaction, simulate, inspect full destination, explicitly confirm, approve in wallet, broadcast with preflight, wait for confirmation and compare every account's SOL delta, fee and exact message.
-- **Signing constraints:** only direct SOL transfers; total amount ≤0.01 devnet SOL; one signer; connected wallet must be fee payer and source; successful simulation bound to exact transaction bytes, known fee, original valid blockhash and review age ≤60 seconds. Message mutation, account changes, stale reviews and missing signatures are blocked. No auto-refresh of signed bytes.
+- **Implemented wallet path (temporarily paused, not real-wallet verified):** injected Phantom or Solflare; build a fresh 0.001 devnet SOL transaction, simulate, inspect full destination, explicitly confirm, approve in wallet, broadcast with preflight, wait for confirmation and compare every account's SOL delta, fee and exact message.
+- **Signing constraints:** only direct SOL transfers; total amount ≤0.01 devnet SOL; one signer; connected wallet must be fee payer and source; successful simulation bound to exact transaction bytes, known fee, original valid blockhash and review age ≤60 seconds. An additional exact-original-message simulation runs immediately before any wallet prompt, without a replacement blockhash; failure blocks the request. This is not a guarantee of Phantom acceptance. Message mutation, account changes, stale reviews and missing signatures are blocked. No auto-refresh of signed bytes.
 - **Evidence export:** downloadable JSON containing decoded facts, transaction bytes, flags, RPC evidence, receipt and optional actual model output.
 - Responsive workspace, custom SVG identity, About page and comprehensive Field Guide.
 
@@ -41,7 +48,7 @@ npm run build
 2. Select **One signature, two moves** and play the multi-frame storyboard. Then select **The hidden permission**. Notice `18446744073709551615` raw token units and the spending-delegate warning. This is future permission, not money moving now.
 3. Select **An unfamiliar program**. Its effects remain unresolved; the app never assigns a reassuring safety score.
 4. Open **Evidence** for full program/account references; export the report if useful.
-5. Optionally run a fixture simulation: an honest failure is part of the evidence, not a broken successful-payment mock.
+5. Choose **Try live unsigned preview** for a successful real devnet simulation without a wallet, signature or broadcast. It discovers a public funded account, builds fresh bytes, decodes those same bytes and displays the actual RPC result. It is not your wallet; signing is disabled. If public RPC/account discovery fails, no success is invented. Offline fixture simulation may still correctly fail with AccountNotFound.
 
 ### Actual on-device AI
 
@@ -50,10 +57,12 @@ npm run build
 3. Read the generated explanation **alongside** the deterministic evidence, not instead of it. The model can omit facts or hallucinate. A narrow output check withholds invented numbers and unsupported safety language, but is not a factuality guarantee.
 4. On an unsupported/low-memory device, the app reports that no explanation was generated. There is no secret paid or hosted inference fallback.
 
-### Funded devnet wallet / real receipt
+### Implemented funded-devnet wallet / receipt flow — currently paused
+
+Do not retry wallet requests or override the reported Phantom warning. These steps document the implemented flow, not instructions to use the blocked deployment. Its security-review cause remains unknown.
 
 1. Install Phantom or Solflare, select **devnet**, connect, and obtain **free test SOL** from https://faucet.solana.com/. Never buy tokens for this demo.
-2. Replace the default destination with another public address you control if preferred. The default is an illustrative public key; Signal cannot recover tokens sent there.
+2. Enter another devnet public address you control. No wallet-transfer destination is prefilled.
 3. Build the 0.001 SOL payment, inspect amount and destination, simulate, then sign within 60 seconds. If expired, rebuild and review again.
 4. A dedicated modal requires acknowledgment, then your wallet separately requests a signature. Nothing is signed by Signal itself.
 5. After broadcast, keep the signature. A confirmation timeout is not proof of failure; use **Check confirmed receipt**, not another transfer.
@@ -74,6 +83,7 @@ React workspace
   ├─ engine.ts       Solana SDK deserialization → instruction layouts → frames + flags
   ├─ ai-policy.ts    bounded factual prompts + narrow generated-output sanity checks
   ├─ ai.worker.ts    lazy ONNX local inference; no signing authority or network RPC
+  ├─ live-example.ts public funded-account discovery → fresh unsigned simulation (no wallet)
   ├─ rpc.ts          fixed-origin /api/rpc → devnet identity → simulation / receipts
   └─ signing.ts      explicit consent + bound preview + unchanged message → wallet
                           ↓
@@ -98,9 +108,9 @@ The classic SPL Token instruction layout decoder uses byte tags and exact `BigIn
 
 - `npm run build` and strict TypeScript validation.
 - Automated decoder, permission-risk, numeric precision, unknown-operation, signing-policy, message-binding, RPC-error, receipt-comparison, AI-output-policy and DOM interaction tests.
-- `RUN_DEVNET=1 npm test -- tests/devnet.integration.test.ts` performs **read-only live devnet** genesis verification and unsigned simulation. It uses a funded public address found in a public block for simulation only; no private key, faucet request, signature or broadcast. See `docs/devnet-smoke.json`.
+- `RUN_DEVNET=1 npm test -- tests/devnet.integration.test.ts` exercises the actual no-wallet sample feature through the production relay handler against **live devnet**, including genesis verification and unsigned simulation. It uses a funded public address found in a public block for simulation only; no private key, faucet request, signature or broadcast. See `docs/devnet-smoke.json`.
 - `node scripts/check-ai.mjs` downloads the actual q4 model and runs local **Node CPU** inference; this verifies real model execution, **not browser WASM**. See `docs/ai-smoke.json`.
-- **Still requires real-browser verification:** desktop/mobile layout, browser-worker model download and WASM execution, injected-wallet approval, actual devnet broadcast and confirmed receipt loop. DOM tests are not browser tests. No screenshot or browser-tested claim is fabricated.
+- **Still requires verification:** the new no-wallet action and pause banner need browser QA; browser-worker model download and WASM execution, mobile layout, injected-wallet approval, actual devnet broadcast and confirmed receipt loop have not been established here. Wallet actions must remain paused pending review of the reported Phantom block. DOM tests are not browser tests. No screenshot or browser-tested claim is fabricated.
 
 ## Deploying
 

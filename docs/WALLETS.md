@@ -31,7 +31,7 @@ Wallet Standard requests explicitly name `solana:devnet`; account and transactio
 
 ## Security and privacy boundaries
 
-Phantom blocked a request on this domain; the specific cause remains unknown. These new general wallet options are user-requested interoperability, **not** a route around that block. Close blocked requests. Never override warnings, disable protections, or switch wallets/domains to evade them. No automatic retries/fallbacks occur.
+An earlier Phantom request was blocked on this domain; the specific cause remains unknown. On 7 November 2026, the owner subsequently reported that Phantom connected on their device without any warning/block. No transaction was confirmed. This firsthand connection report is device-specific, not blanket domain clearance, and real signing remains unverified. These new general wallet options are user-requested interoperability, **not** a route around that block. Close blocked requests. Never override warnings, disable protections, or switch wallets/domains to evade them. No automatic retries/fallbacks occur.
 
 The Solflare SDK loads a third-party connection frame only after explicit selection. Its connection service can receive normal page/provider metadata; its preferred-adapter setting may be saved by that SDK. Signal restricts its SDK frame-message channel to the official connection-frame origin and actual frame window. This is defense in depth, not an independent audit or Phantom clearance. No wallet keys/seed phrases are requested by Signal. MWA authorization stays in memory; no remote relay is configured. Nothing is signed/broadcast merely by connecting or opening a browse link.
 

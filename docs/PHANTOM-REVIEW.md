@@ -31,3 +31,7 @@ Phantom’s documentation links its domain/transaction review team at:
 https://docs.google.com/forms/d/1JgIxdmolgh_80xMfQKBKx9-QPC7LRdN6LHpFFW8BlKM/viewform
 
 No form, email or review request has been sent. The owner must approve/submit any external report. Provide actual triggering transaction bytes only after obtaining them safely, without repeating a blocked signing request. Never provide seed phrases, private keys, login data or credentials.
+
+## Subsequent owner report — 7 November 2026
+
+The owner reports a Phantom connection completed on their device without a warning or block. No transaction was confirmed. This does not establish why the earlier request was blocked, blanket clearance for other devices/requests, or a verified transaction-signing flow. No reinstall, bypass or external review submission was performed.

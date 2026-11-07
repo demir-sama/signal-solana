@@ -2,7 +2,7 @@ import bs58 from 'bs58';
 import { Buffer } from 'buffer';
 import { describe,it,expect,vi,afterEach } from 'vitest';
 import { Keypair, VersionedTransaction } from '@solana/web3.js';
-import { parseTransaction,buildPayment, FIXTURE_RECIPIENT, DEVNET_GENESIS } from '../src/engine';
+import { parseTransaction,buildPayment,fixture, FIXTURE_RECIPIENT, DEVNET_GENESIS } from '../src/engine';
 import { authorizeAndBroadcast } from '../src/signing';
 import type { Simulation } from '../src/rpc';
 const kp=Keypair.generate(); // Ephemeral, in-memory test key; never used on-chain.
@@ -14,6 +14,8 @@ const wallet={publicKey:kp.publicKey,signTransaction:sign};
 afterEach(()=>{vi.unstubAllGlobals();vi.restoreAllMocks();sign.mockClear()});
 describe('authorization and message binding',()=>{
  it('requires explicit confirmation before any wallet or network request',async()=>{const methods=mockRpc();await expect(authorizeAndBroadcast({analysis:a,simulation:sim(),wallet,fixture:false,confirmed:false})).rejects.toThrow();expect(methods).toEqual([]);expect(sign).not.toHaveBeenCalled()});
+ it('blocks inspection fixtures even with a matching wallet and successful-looking simulation',async()=>{const methods=mockRpc();await expect(authorizeAndBroadcast({analysis:a,simulation:sim(),wallet,fixture:true,confirmed:true})).rejects.toThrow();expect(methods).toEqual([]);expect(sign).not.toHaveBeenCalled()});
+ it('blocks unsupported and permission transactions through direct signing-module imports',async()=>{for(const kind of ['approval','unknown'] as const){const analysis=parseTransaction(fixture(kind));const methods=mockRpc();const w={publicKey:{toBase58:()=>analysis.payer} as any,signTransaction:sign};await expect(authorizeAndBroadcast({analysis,simulation:{...sim(),transaction:analysis.base64},wallet:w,fixture:false,confirmed:true})).rejects.toThrow();expect(methods).toEqual([]);expect(sign).not.toHaveBeenCalled()}});
  it('rejects stale simulation',async()=>{mockRpc();await expect(authorizeAndBroadcast({analysis:a,simulation:{...sim(),at:Date.now()-61000},wallet,fixture:false,confirmed:true})).rejects.toThrow(/60 seconds/)});
  it('rejects a simulation bound to different transaction bytes',async()=>{mockRpc();await expect(authorizeAndBroadcast({analysis:a,simulation:{...sim(),transaction:'different-bytes'},wallet,fixture:false,confirmed:true})).rejects.toThrow()});
  it('rejects failed simulation',async()=>{mockRpc();await expect(authorizeAndBroadcast({analysis:a,simulation:{...sim(),err:'AccountNotFound'},wallet,fixture:false,confirmed:true})).rejects.toThrow()});

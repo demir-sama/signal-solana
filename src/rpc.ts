@@ -1,9 +1,11 @@
 import { Buffer } from 'buffer';
 import { VersionedTransaction } from '@solana/web3.js';
+import { TRANSACTION_SIGNING_ENABLED } from './features';
 import { DEVNET_GENESIS, type Analysis, expectedDeltas } from './engine';
 let id=0;
 function exactInteger(n:unknown):bigint {if(typeof n!=='number'||!Number.isSafeInteger(n)||n<0)throw new Error('RPC returned a balance outside exact JavaScript integer range. Numeric comparison is unavailable rather than rounded.');return BigInt(n);}
 export async function rpc<T=any>(method:string,params:unknown[]=[]):Promise<T>{
+ if(method==='sendTransaction'&&!TRANSACTION_SIGNING_ENABLED)throw new Error('Transaction broadcasting is disabled in this release.');
  const res=await fetch('/api/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:++id,method,params}),signal:AbortSignal.timeout(20000)});
  if(!res.ok)throw new Error(`Devnet RPC unavailable (HTTP ${res.status}). Decoding still works offline; retry later.`);
  const data=await res.json();if(data.error)throw new Error(String(data.error.message??'RPC error').slice(0,240));return data.result as T;

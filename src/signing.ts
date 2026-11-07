@@ -1,10 +1,12 @@
 import bs58 from 'bs58';
 import { Buffer } from 'buffer';
 import { PublicKey, VersionedTransaction } from '@solana/web3.js';
+import { TRANSACTION_SIGNING_ENABLED } from './features';
 import { canSign, type Analysis } from './engine';
 import { assertDevnet, rpc, type Simulation } from './rpc';
 export type SigningWallet={publicKey?:PublicKey;signTransaction:(tx:VersionedTransaction)=>Promise<VersionedTransaction>};
 export async function authorizeAndBroadcast({analysis:a,simulation:sim,wallet,fixture,confirmed,isCurrent=()=>true,onBroadcastAttempt}:{analysis:Analysis;simulation:Simulation|null;wallet:SigningWallet;fixture:boolean;confirmed:boolean;isCurrent?:()=>boolean;onBroadcastAttempt?:(signature:string)=>void}):Promise<string>{
+ if(!TRANSACTION_SIGNING_ENABLED)throw new Error('Transaction signing is disabled in this release. Nothing signed or broadcast.');
  const reason=canSign(a,wallet.publicKey?.toBase58()??null,fixture);
  const fresh=()=>!!sim&&Date.now()-sim.at>=0&&Date.now()-sim.at<=60000;
  if(!confirmed||!sim||sim.transaction!==a.base64||sim.err||sim.fee===null||reason||!fresh()||!isCurrent())throw new Error(reason??'A confirmed review and a successful simulation with a known fee less than 60 seconds old are required.');

@@ -18,11 +18,11 @@ The triggering action, actual wallet-request bytes, Phantom version, wallet-sele
 
 ## Corrective changes in this patch
 
-Wallet connection/signing UI and entry-point handlers are paused while the warning is unresolved. No alternate domain/wallet or bypass is suggested. The independent no-wallet path remains usable.
+The owner explicitly requested restoring manual wallet connection and normal constrained devnet signing. Both features are available; this does not resolve or clear Phantom’s warning. Separate release switches guard connection and signing. No request is automatic, and external blocks/rejections propagate without retry or alternate-provider/domain fallback. No actual wallet connection, signature or broadcast has been performed by the implementation agent. The independent no-wallet path remains usable.
 
 The signing module now requires another successful unsigned simulation of the **exact original message**, without replacement blockhash, immediately before requesting approval; failure, expiration or changed review stops before the wallet. Previously the preview used a replacement blockhash and separately checked original-blockhash validity. This improves evidence freshness but is not a proven fix for Phantom’s warning. No wallet-payment destination is prefilled: the user must explicitly supply a devnet address they control. Phantom provider presence is checked with its documented `isPhantom` flag; no alternate provider is tried after a blocked/rejected request.
 
-These changes are not Phantom approval and must not be represented as clearing the warning. Do not unpause just because generic unsigned simulation passes.
+These changes are not Phantom approval and must not be represented as clearing the warning. Feature availability is not permission to bypass a wallet warning or approval of any particular transfer.
 
 ## Official review route — not submitted
 

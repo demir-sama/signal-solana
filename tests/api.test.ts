@@ -1,0 +1,8 @@
+import { afterEach,it,expect,vi } from 'vitest';
+import handler from '../api/rpc';
+function response(){const r:any={setHeader:vi.fn(),status:vi.fn(),json:vi.fn()};r.status.mockReturnValue(r);r.json.mockReturnValue(r);return r}
+afterEach(()=>{vi.unstubAllGlobals()});
+it('rejects non-POST relay requests',async()=>{const r=response();await handler({method:'GET'},r);expect(r.status).toHaveBeenCalledWith(405)});
+it('rejects arbitrary RPC methods and batches',async()=>{for(const body of [{jsonrpc:'2.0',method:'requestAirdrop'},[{jsonrpc:'2.0',method:'getBalance'}]]){const r=response();await handler({method:'POST',body},r);expect(r.status).toHaveBeenCalledWith(400)}});
+it('forwards only to the fixed public devnet endpoint with no credentials',async()=>{vi.stubGlobal('fetch',vi.fn(async()=>new Response(JSON.stringify({result:'public-genesis'}))));const r=response();await handler({method:'POST',body:{jsonrpc:'2.0',method:'getGenesisHash',id:1}},r);expect(fetch).toHaveBeenCalledWith('https://api.devnet.solana.com',expect.objectContaining({method:'POST',headers:{'Content-Type':'application/json'}}));expect(r.status).toHaveBeenCalledWith(200)});
+it('reports upstream outages without fabricating RPC success',async()=>{vi.stubGlobal('fetch',vi.fn(async()=>new Response('rate limited',{status:429})));const r=response();await handler({method:'POST',body:{jsonrpc:'2.0',method:'getGenesisHash'}},r);expect(r.status).toHaveBeenCalledWith(503)});

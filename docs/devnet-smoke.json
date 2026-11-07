@@ -1,0 +1,16 @@
+{
+  "verifiedAt": "2026-11-07T15:26:15.498Z",
+  "network": "devnet",
+  "method": "read-only unsigned simulation; no broadcast",
+  "fixtureFailure": "AccountNotFound",
+  "successfulSimulation": {
+    "slot": 519704539,
+    "units": 150,
+    "err": null,
+    "logs": [
+      "Program 11111111111111111111111111111111 invoke [1]",
+      "Program 11111111111111111111111111111111 success"
+    ]
+  },
+  "limitations": "Not a wallet/signature/confirmed-receipt test. A public funded account was used for unsigned simulation only."
+}

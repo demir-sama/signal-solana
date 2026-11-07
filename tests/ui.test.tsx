@@ -1,0 +1,17 @@
+// @vitest-environment jsdom
+import { afterEach,describe,it,expect,vi } from 'vitest';
+vi.hoisted(async()=>{const { Buffer }=await import('node:buffer');globalThis.Uint8Array=Object.getPrototypeOf(Buffer.prototype).constructor;});
+import { cleanup,fireEvent,render,screen } from '@testing-library/react';
+import App from '../src/App';
+import { fixture } from '../src/engine';
+afterEach(()=>{cleanup();vi.restoreAllMocks();window.history.replaceState({},'', '/')});
+describe('workspace DOM interaction (not a browser test)',()=>{
+ it('renders a usable no-wallet walkthrough without fabricated AI or execution',()=>{render(<App/>);expect(screen.getByText('See where it’s going.')).toBeDefined();expect(screen.getByText('Not run')).toBeDefined();expect(screen.getByText(/No AI explanation generated yet/)).toBeDefined();expect((screen.getByRole('button',{name:/Review & sign/}) as HTMLButtonElement).disabled).toBe(true)});
+ it('changes a serialized fixture into an actual delegate permission warning',()=>{render(<App/>);fireEvent.click(screen.getByRole('button',{name:/The hidden permission/}));expect(screen.getByText('Spending permission')).toBeDefined();expect(screen.getByText('PERMISSION · NOT A TRANSFER')).toBeDefined();expect(screen.getAllByText('18446744073709551615 raw token units')).toHaveLength(2)});
+ it('shows honest uncertainty for unknown program instructions',()=>{render(<App/>);fireEvent.click(screen.getByRole('button',{name:/An unfamiliar program/}));expect(screen.getByText('Not every story is readable.')).toBeDefined();expect(screen.getByText('Incomplete preview. Signing blocked.')).toBeDefined();expect(screen.getByText('Unresolved instruction')).toBeDefined()});
+ it('invalidates a preview when its input changes',()=>{render(<App/>);fireEvent.change(screen.getByLabelText(/Serialized transaction/),{target:{value:fixture('approval')}});expect(screen.getByText(/Input changed. Decode it/)).toBeDefined();expect((screen.getByRole('button',{name:/Simulate on devnet/}) as HTMLButtonElement).disabled).toBe(true);fireEvent.click(screen.getByRole('button',{name:'Decode transaction'}));expect(screen.queryByText(/Input changed. Decode it/)).toBeNull();expect(screen.getByText('Spending permission')).toBeDefined()});
+ it('rejects invalid transaction input without an action',()=>{render(<App/>);fireEvent.change(screen.getByLabelText(/Serialized transaction/),{target:{value:'invalid bytes!!'}});fireEvent.click(screen.getByRole('button',{name:'Decode transaction'}));expect(screen.getByText(/Enter one base64-encoded/)).toBeDefined()});
+ it('provides the full account references behind the visualization',()=>{render(<App/>);fireEvent.click(screen.getByRole('tab',{name:'Evidence'}));expect(screen.getByText('Account references')).toBeDefined();expect(screen.getByText('Program references')).toBeDefined();expect(screen.getByText('Legacy')).toBeDefined()});
+ it('renders the About route and concrete limitations docs',()=>{window.history.replaceState({},'','/about');const view=render(<App/>);expect(screen.getByText('Evidence first.')).toBeDefined();view.unmount();window.history.replaceState({},'','/docs');render(<App/>);expect(screen.getByText('06 / Honest limits')).toBeDefined();expect(screen.getByText(/CPI effects are not interpreted/)).toBeDefined()});
+ it('explains a missing wallet instead of silently failing',async()=>{render(<App/>);fireEvent.click(screen.getByRole('button',{name:'Connect wallet'}));expect(await screen.findByText(/No supported wallet detected/)).toBeDefined()});
+});

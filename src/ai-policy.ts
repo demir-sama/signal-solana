@@ -9,6 +9,8 @@ export function checkGeneratedExplanation(text:string,evidence:string):string|nu
  const numbers=(s:string)=>s.match(/\d+(?:\.\d+)?/g)??[];
  const allowed=new Set(numbers(evidence));
  if(numbers(text).some(n=>!allowed.has(n)))return 'The model introduced a number that is not in the evidence. Its explanation was withheld.';
+ const inventedAsset=(text.match(/\b(?:SOL|DOT|BTC|ETH|USDC|USDT)\b/g)??[]).find(asset=>!evidence.includes(asset));
+ if(inventedAsset)return 'The model introduced an asset name outside the evidence. Its explanation was withheld.';
  if(/\b(safe|guaranteed|risk-free|trustworthy)\b/i.test(text))return 'The model used unsupported safety language. Its explanation was withheld.';
  return null;
 }

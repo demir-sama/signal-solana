@@ -1,1 +1,0 @@
-{"root":["./src/App.tsx","./src/ai-policy.ts","./src/ai.worker.ts","./src/engine.ts","./src/main.tsx","./src/rpc.ts","./src/signing.ts","./tests/ai-policy.test.ts","./tests/api.test.ts","./tests/devnet.integration.test.ts","./tests/engine.test.ts","./tests/rpc.test.ts","./tests/signing.test.ts","./tests/ui.test.tsx","./vite.config.ts"],"version":"5.9.3"}

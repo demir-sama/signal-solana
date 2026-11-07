@@ -12,6 +12,13 @@ A user reported Phantom’s “This dApp could be malicious” / blocked-request
 
 No-wallet decoding, real unsigned devnet simulation and optional local AI remain available.
 
+## Live release and submission materials
+
+- App: https://signal-solana.vercel.app
+- Source: https://github.com/demir-sama/signal-solana
+- [Copy-ready submission description](docs/SUBMISSION.md) · [90-second demo script](docs/DEMO-SCRIPT.md) · [event/deadline notes](docs/HACKATHON.md)
+- No demo video URL is claimed; record and upload one only if the actual submission form requires it. No submission has been made.
+
 ## Run locally
 
 Requires Node 22.12+ (tested with Node 24), npm, and a modern browser.
@@ -89,6 +96,8 @@ React workspace
   ├─ engine.ts       Solana SDK deserialization → instruction layouts → frames + flags
   ├─ ai-policy.ts    bounded factual prompts + narrow generated-output sanity checks
   ├─ ai.worker.ts    lazy ONNX local inference; no signing authority or network RPC
+  ├─ wallets.ts      explicit Wallet Standard / Solflare / local Android MWA transports
+  ├─ WalletChooser   accessible, manually selected provider; no automatic fallback
   ├─ features.ts     independent connection/signing release switches; both manually enabled
   ├─ live-example.ts public funded-account discovery → fresh unsigned simulation (no wallet)
   ├─ rpc.ts          fixed-origin /api/rpc → devnet identity → simulation / receipts
@@ -117,7 +126,7 @@ The classic SPL Token instruction layout decoder uses byte tags and exact `BigIn
 - Automated decoder, permission-risk, numeric precision, unknown-operation, signing-policy, message-binding, RPC-error, receipt-comparison, AI-output-policy and DOM interaction tests.
 - `RUN_DEVNET=1 npm test -- tests/devnet.integration.test.ts` exercises the actual no-wallet sample feature through the production relay handler against **live devnet**, including genesis verification and unsigned simulation. It uses a funded public address found in a public block for simulation only; no private key, faucet request, signature or broadcast. See `docs/devnet-smoke.json`.
 - `node scripts/check-ai.mjs` downloads the actual q4 model and runs local **Node CPU** inference; this verifies real model execution, **not browser WASM**. See `docs/ai-smoke.json`.
-- **Verification boundary:** separate desktop browser QA reported the guided demo, animation, live unsigned preview and docs working. The owner reports a warning-free Phantom connection on their device, but no confirmed transaction. The latest empty-input/stale-evidence and dialog-accessibility corrections still need browser re-checking. Browser-worker inference, narrow mobile layout, actual mobile wallet transports, devnet signing/broadcast and the confirmed receipt loop remain unverified. Earlier Phantom warning cause remains unknown; no blanket clearance or bypass is claimed. DOM tests are not browser tests.
+- **Verification boundary:** separate desktop browser QA reported the guided demo, animation, live unsigned preview and docs working. The owner reports a warning-free Phantom connection on their device, but no confirmed transaction. Desktop browser QA subsequently passed the empty-input/stale-evidence and named-dialog corrections and previously observed genuine local browser AI generation. The final worker remains byte-identical to that tested implementation. Narrow mobile rendering, actual mobile wallet transports, devnet signing/broadcast and the confirmed receipt loop remain unverified. Source-cascade regression checks at 360/390/768/1280px are not rendered-device tests. Earlier Phantom warning cause remains unknown; no blanket clearance or bypass is claimed. DOM tests are not browser tests.
 
 ## Deploying
 

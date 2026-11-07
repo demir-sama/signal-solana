@@ -1,19 +1,12 @@
 {
-  "verifiedAt": "2026-11-07T16:08:31.692Z",
+  "verifiedAt": "2026-11-07 18:12:43 WAT",
+  "origin": "https://signal-solana.vercel.app",
   "network": "devnet",
-  "method": "Actual prepareLiveExample feature through production API handler; read-only unsigned simulation, no wallet or broadcast",
-  "fixtureOutcome": "AccountNotFound",
-  "successfulSimulation": {
-    "slot": 519715143,
-    "units": 150,
-    "fee": 5000,
-    "err": null,
-    "logs": [
-      "Program 11111111111111111111111111111111 invoke [1]",
-      "Program 11111111111111111111111111111111 success"
-    ]
-  },
-  "discoveredSlot": 519715137,
+  "method": "Actual prepareLiveExample through the live production API; fixed devnet genesis checked; unsigned read-only simulation",
+  "slot": 519731245,
+  "units": 150,
+  "fee": 5000,
+  "err": null,
   "rpcMethods": [
     "getGenesisHash",
     "getSlot",
@@ -24,5 +17,15 @@
     "getMultipleAccounts",
     "simulateTransaction"
   ],
-  "limitations": "Not browser, wallet, signature, broadcast, confirmed receipt or Phantom clearance verification. Public funded fee-payer address used for unsigned simulation only."
+  "signaturesRequested": 0,
+  "broadcasts": 0,
+  "sourceModuleUnchangedSincePreviousRelease": true,
+  "automatedTestsPassed": 119,
+  "responsiveSourceWidths": [
+    360,
+    390,
+    768,
+    1280
+  ],
+  "limitations": "This is not a browser/mobile test or real-wallet signing/receipt verification. Separate desktop browser QA observed genuine local AI generation and passed latest transaction-state/dialog corrections. Owner reports a warning-free Phantom connection on one device; no blanket clearance."
 }

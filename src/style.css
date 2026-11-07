@@ -27,3 +27,13 @@ summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;
 
 /* Native dialog keeps its accessible name and our existing centered modal layout. */
 dialog.wallet-chooser{margin:0;inset:auto;border:1px solid #dce4d3;color:inherit;min-width:0;display:block}
+
+/* Release audit: intrinsic-size hardening; this is not a rendered-device claim. */
+.welcome{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
+.welcome-copy,.welcome-preview,.docs-layout>div,.step>div,.flag>div{min-width:0}
+.docs-layout{grid-template-columns:180px minmax(0,1fr)}
+.step>div,.flag>div,.document p,.document li,.document dd{overflow-wrap:anywhere}
+.confirm-modal{max-width:calc(100vw - 32px)}
+.evidence pre{max-width:100%;overflow-x:auto}
+@media(max-width:1000px){.docs-layout{grid-template-columns:130px minmax(0,1fr)}}
+@media(max-width:700px){.docs-layout{grid-template-columns:minmax(0,1fr)}.header-actions{min-width:0;max-width:calc(100% - 140px)}.wallet-button{max-width:100%;min-width:0}.header-actions .network{display:none}.receipt-table>div{grid-template-columns:minmax(0,1.1fr) repeat(2,minmax(0,1fr))}.receipt-table code{overflow-wrap:anywhere}.receipt-table .address{max-width:100%;min-width:0;overflow:hidden}}

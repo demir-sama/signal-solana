@@ -35,7 +35,7 @@ npm run build
 - **Live no-wallet sample:** explicit action discovers a public funded system-owned devnet fee-payer from recent public block metadata, builds fresh genuine SDK transaction bytes, and shows only an actually successful unsigned simulation. It claims no authority over that account, never signs/broadcasts, replaces the displayed bytes visibly, and stays marked inspection-only. Bounded attempts and RPC errors fail honestly.
 - **Devnet simulation:** verified cluster genesis, unsigned simulation with `sigVerify: false`, `replaceRecentBlockhash: true`, logs, compute usage, fee estimate and account snapshots. No broadcast during simulation.
 - **Real local AI:** optional SmolLM2-360M-Instruct ONNX q4 inference using Transformers.js, inside a dedicated WASM Web Worker. Download consent is explicit; about **390 MB** model files plus about 27 MB runtime, with substantial RAM requirements. No generated text is shown before the model actually runs.
-- **Manual wallet path (not real-wallet verified):** injected Phantom or Solflare; build a fresh 0.001 devnet SOL transaction, simulate, inspect full destination, explicitly confirm, approve in wallet, broadcast with preflight, wait for confirmation and compare every account's SOL delta, fee and exact message.
+- **Explicit multiwallet path (device verification still required):** devnet-compatible Wallet Standard discovery, detected Phantom/Solflare, lazy official Solflare SDK and local Android-Chrome MWA; build a fresh 0.001 devnet SOL transaction, simulate, inspect full destination, explicitly confirm, approve in wallet, broadcast with preflight, wait for confirmation and compare every account's SOL delta, fee and exact message.
 - **Signing constraints:** only direct SOL transfers; total amount ≤0.01 devnet SOL; one signer; connected wallet must be fee payer and source; successful simulation bound to exact transaction bytes, known fee, original valid blockhash and review age ≤60 seconds. An additional exact-original-message simulation runs immediately before any wallet prompt, without a replacement blockhash; failure blocks the request. This is not a guarantee of Phantom acceptance. Message mutation, account changes, stale reviews and missing signatures are blocked. No auto-refresh of signed bytes.
 - **Evidence export:** downloadable JSON containing decoded facts, transaction bytes, flags, RPC evidence, receipt and optional actual model output.
 - Responsive workspace, custom SVG identity, About page and comprehensive Field Guide.
@@ -44,7 +44,7 @@ npm run build
 
 ### No wallet / no model download
 
-1. Open **Simple payment**. The actual decoded amount is 0.001 SOL; no execution is claimed.
+1. Choose **Try a transaction** for a freshly built real unsigned devnet sample, or **Inspect yours** for an empty transaction input. Expand the example picker for offline walkthroughs. Open **Simple payment**. The actual decoded amount is 0.001 SOL; no execution is claimed.
 2. Select **One signature, two moves** and play the multi-frame storyboard. Then select **The hidden permission**. Notice `18446744073709551615` raw token units and the spending-delegate warning. This is future permission, not money moving now.
 3. Select **An unfamiliar program**. Its effects remain unresolved; the app never assigns a reassuring safety score.
 4. Open **Evidence** for full program/account references; export the report if useful.
@@ -61,7 +61,7 @@ npm run build
 
 The reported Phantom warning remains unexplained. These features are available by owner request, not wallet clearance. If your wallet blocks a request, close it; do not override it or retry via another wallet/domain. No particular transfer is authorized by enabling the feature.
 
-1. Install Phantom or Solflare, select **devnet**, connect, and obtain **free test SOL** from https://faucet.solana.com/. Never buy tokens for this demo.
+1. Choose **Connect wallet**, explicitly select a supported provider, keep it on **devnet**, and obtain **free test SOL** from https://faucet.solana.com/. Never buy tokens for this demo.
 2. Enter another devnet public address you control. No wallet-transfer destination is prefilled.
 3. Build the 0.001 SOL payment, inspect amount and destination, simulate, then sign within 60 seconds. If expired, rebuild and review again.
 4. A dedicated modal requires acknowledgment, then your wallet separately requests a signature. Nothing is signed by Signal itself.
@@ -75,6 +75,12 @@ Model: [`HuggingFaceTB/SmolLM2-360M-Instruct`](https://huggingface.co/HuggingFac
 The AI receives locally constructed facts: known instruction types, exactly formatted amounts, deterministic risk titles and simulation status. **No memo text, RPC log strings, free-form user labels, keys, or identity claims enter the prompt.** The model receives the actual structured evidence, not a canned explanation. Generated text never controls signing policy or changes transaction bytes. Decoder/risk output is explicitly deterministic, never mislabeled AI.
 
 Transaction evidence stays on-device for inference. Hugging Face/CDNs receive model-download requests/network metadata. Simulation and broadcasting send public transaction bytes/accounts to the official Solana devnet RPC through the host. Hosting providers can keep ordinary request logs. There is no analytics integration, app-side history/database or server-side inference. Google Fonts receives normal font-download network metadata, not transaction evidence. Exported reports include public addresses, transaction bytes, logs and optional model text—review before sharing.
+
+## Wallets and mobile
+
+See [supported paths, limitations, official sources and device QA](docs/WALLETS.md). Desktop injection alone was not mobile support. This release adds an actual wallet chooser, official Solflare SDK connection, Wallet Standard providers and local Mobile Wallet Adapter registration on supported Android Chrome. No automatic connection/fallback, sign-in message, or sign-and-send shortcut is used. iOS has no MWA; the Solflare browse link is explicitly navigation only, never a connected state.
+
+The main journey is now **Try a transaction → understand the planned move → check devnet evidence → optionally use your wallet**. Technical bytes, frame details and the ~390 MB optional local model are progressively disclosed. Motion is finite, user-controllable, and disabled for reduced-motion preferences.
 
 ## Architecture
 
@@ -103,7 +109,7 @@ The classic SPL Token instruction layout decoder uses byte tags and exact `BigIn
 - Where supported, simulation returns atomic pre/post balances. Older RPC responses require separately read pre-balances; that delta view is explicitly approximate/non-atomic. SPL token balance receipt comparison is not implemented.
 - Receipt verification is implemented for constrained direct SOL transfers, at `confirmed` commitment (not necessarily finalized). Devnet can reset. Public RPCs may fail or rate-limit.
 - The AI is a small model, is slow/resource-intensive on some devices, and may generate inaccurate or incomplete explanations. The deterministic engine remains authoritative.
-- Current dependency audit: four **moderate** transitive advisories in legacy `@solana/web3.js`'s `jayson`/`stream-json`/`uuid` dependency chain. Signal uses neither its Node streaming RPC nor uuid v3/v5/v6 functionality; the server route imports none of the SDK. No high or critical advisory remains in the installed dependency graph. This is not an independent security audit.
+- Current dependency audit: five **moderate** direct/inherited dependency advisories in `@solana/web3.js` / `@solflare-wallet/sdk` and their `jayson`/`stream-json`/`uuid` dependency chain. Signal uses neither its Node streaming RPC nor uuid v3/v5/v6 functionality; the server route imports none of the SDK. No high or critical advisory remains in the installed dependency graph. This is not an independent security audit.
 
 ## Verification status
 
